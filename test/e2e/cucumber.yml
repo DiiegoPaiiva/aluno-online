@@ -1,4 +1,0 @@
----
-default: --publish-quiet --profile html --profile pretty
-html: --format html --out=reports/relatorio.html
-pretty: --format pretty
