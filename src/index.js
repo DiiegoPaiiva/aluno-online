@@ -1,28 +1,46 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const userRoutes = require('./routes/userRoutes');
+const express = require('express')
+const mongoose = require('mongoose')
 
-dotenv.config();
+const app = express()
+app.use(express.json())
+const port = 3000
 
-const app = express();
 
-app.use(express.json());
+const Usuario = mongoose.model('Usuario', { name: String, email: String, senha: String })
 
-const PORT = process.env.PORT || 5000;
+app.get('/', async (req, res) => {
+    const usuarios = await Usuario.find()
+    return res.send(usuarios)
+})
 
-mongoose.connect(process.env.MONGO_URI).then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => {
-  console.error('Failed to connect to MongoDB', err);
-});
+app.delete('/:id', async (req, res) => {
+    const usuario = await Usuario.findByIdAndDelete(req.params.id)
+        return res.send(usuario)
+})
 
-app.use('/api/users', userRoutes);
+app.put('/:id', async (req, res) => {
+    const usuario = await Usuario.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        email: req.body.email,
+        senha: req.body.senha
+    }, {
+        new: true
+    })
+        return res.send(usuario)
+})
 
-app.get('/', (req, res) => {
-  res.send('API is running...');
-});
+app.post('/', async (req, res) => {
+    const usuario = new Usuario({
+        name: req.body.name,
+        email: req.body.email,
+        senha: req.body.senha
+    })
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    await usuario.save()
+    return res.send(usuario)
+})
+
+app.listen(port, () => {
+    mongoose.connect('mongodb+srv://diegopaiva:Dapp0918@test.yaapjdv.mongodb.net/?retryWrites=true&w=majority&appName=Test')
+    console.log('Rodando')
+})
